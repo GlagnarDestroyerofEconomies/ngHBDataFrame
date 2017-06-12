@@ -33,6 +33,7 @@ HcalDigiDump::HcalDigiDump(edm::ParameterSet const& conf) {
   consumesMany<HcalTTPDigiCollection>();
   consumesMany<QIE10DigiCollection>();
   consumesMany<QIE11DigiCollection>();
+  consumesMany<ngHBDigiCollection>();
   consumesMany<HcalUMNioDigi>();
 }
 
@@ -50,6 +51,7 @@ void HcalDigiDump::analyze(edm::Event const& e, edm::EventSetup const& c) {
   std::vector<edm::Handle<HcalTTPDigiCollection> > ttp;
   std::vector<edm::Handle<QIE10DigiCollection> > qie10s;
   std::vector<edm::Handle<QIE11DigiCollection> > qie11s;
+  std::vector<edm::Handle<ngHBDigiCollection> > ngHBs;
   std::vector<edm::Handle<HcalUMNioDigi> > umnio;
 
   try {
@@ -241,6 +243,18 @@ void HcalDigiDump::analyze(edm::Event const& e, edm::EventSetup const& c) {
       
       for (unsigned j=0; j < c.size(); j++)
 	cout << QIE11DataFrame(c[j]) << std::endl;
+    }
+  } catch (...) {
+  }
+
+  try {
+    e.getManyByType(ngHBs);
+    std::vector<edm::Handle<ngHBDigiCollection> >::iterator i;
+    for (i=ngHBs.begin(); i!=ngHBs.end(); i++) {
+      const ngHBDigiCollection& c=*(*i);
+      
+      for (unsigned j=0; j < c.size(); j++)
+	cout << ngHBDataFrame(c[j]) << std::endl;
     }
   } catch (...) {
   }

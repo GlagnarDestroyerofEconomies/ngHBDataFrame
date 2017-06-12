@@ -50,6 +50,7 @@ namespace DataFormats_HcalDigi {
     HcalTTPDigiCollection theTTP_;
     QIE10DigiCollection theqie10_;
     QIE11DigiCollection theqie11_;
+    ngHBDigiCollection theNGHB_;
       
     edm::Wrapper<edm::SortedCollection<HBHEDataFrame> > anotherHBHE_;
     edm::Wrapper<edm::SortedCollection<HODataFrame> > anotherHO_;
@@ -79,6 +80,7 @@ namespace DataFormats_HcalDigi {
     edm::Wrapper<HFUpgradeDigiCollection> theUHFw_;
     edm::Wrapper<QIE10DigiCollection> theQIE10w_;
     edm::Wrapper<QIE11DigiCollection> theQIE11w_;
+    edm::Wrapper<ngHBDigiCollection> theNGHBw_;
   };
 }
 

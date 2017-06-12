@@ -16,6 +16,7 @@
 
 #include "DataFormats/HcalDigi/interface/QIE10DataFrame.h"
 #include "DataFormats/HcalDigi/interface/QIE11DataFrame.h"
+#include "DataFormats/HcalDigi/interface/ngHBDataFrame.h"
 
 typedef edm::SortedCollection<HBHEDataFrame> HBHEDigiCollection;
 typedef edm::SortedCollection<HODataFrame> HODigiCollection;
@@ -50,6 +51,7 @@ public:
 
 typedef HcalDataFrameContainer<QIE10DataFrame> QIE10DigiCollection;
 typedef HcalDataFrameContainer<QIE11DataFrame> QIE11DigiCollection;
+typedef HcalDataFrameContainer<ngHBDataFrame> ngHBDigiCollection;
 
 
 #endif
