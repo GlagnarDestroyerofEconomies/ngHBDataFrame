@@ -65,6 +65,7 @@ HcalRawToDigi::HcalRawToDigi(edm::ParameterSet const& conf):
     produces<HcalUMNioDigi>();
   produces<QIE10DigiCollection>();
   produces<QIE11DigiCollection>();
+  produces<ngHBDigiCollection>();
   produces<QIE10DigiCollection>("ZDC");
   
   memset(&stats_,0,sizeof(stats_));
@@ -212,6 +213,10 @@ void HcalRawToDigi::produce(edm::Event& e, const edm::EventSetup& es)
     colls.qie11 = new QIE11DigiCollection(); 
   }
   std::unique_ptr<QIE11DigiCollection> qie11_prod(colls.qie11);
+  if (colls.ngHB == 0) {
+    colls.ngHB = new ngHBDigiCollection(); 
+  }
+  std::unique_ptr<ngHBDigiCollection> ngHB_prod(colls.ngHB);
 
   hbhe_prod->swap_contents(hbhe);
   if( !cntHFdup ) hf_prod->swap_contents(hf);
@@ -226,7 +231,7 @@ void HcalRawToDigi::produce(edm::Event& e, const edm::EventSetup& es)
     HFDigiCollection filtered_hf=filter_.filter(*hf_prod,*report);
     QIE10DigiCollection filtered_qie10=filter_.filter(*qie10_prod,*report);
     QIE11DigiCollection filtered_qie11=filter_.filter(*qie11_prod,*report);
-    
+    //no ngHB implementation yet 
     hbhe_prod->swap(filtered_hbhe);
     ho_prod->swap(filtered_ho);
     hf_prod->swap(filtered_hf);    
@@ -245,6 +250,7 @@ void HcalRawToDigi::produce(edm::Event& e, const edm::EventSetup& es)
   qie10_prod->sort();
   qie10ZDC_prod->sort();
   qie11_prod->sort();
+  ngHB_prod->sort();
 
   e.put(std::move(hbhe_prod));
   e.put(std::move(ho_prod));
@@ -254,6 +260,7 @@ void HcalRawToDigi::produce(edm::Event& e, const edm::EventSetup& es)
   e.put(std::move(qie10_prod));
   e.put(std::move(qie10ZDC_prod),"ZDC");
   e.put(std::move(qie11_prod));
+  e.put(std::move(ngHB_prod));
 
   /// calib
   if (unpackCalib_) {

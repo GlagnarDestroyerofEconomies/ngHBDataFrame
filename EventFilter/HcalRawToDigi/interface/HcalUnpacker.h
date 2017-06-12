@@ -34,6 +34,7 @@ public:
     QIE10DigiCollection* qie10;
     QIE10DigiCollection* qie10ZDC;
     QIE11DigiCollection* qie11;
+    ngHBDigiCollection* ngHB;
     HcalUMNioDigi* umnio;
 
   };

@@ -825,6 +825,7 @@ HcalUnpacker::Collections::Collections() {
   qie10=0;
   qie10ZDC=0;
   qie11=0;
+  ngHB=0;
   umnio=0;
 }
 
