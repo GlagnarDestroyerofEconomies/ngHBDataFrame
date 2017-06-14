@@ -22,15 +22,17 @@ public:
   public:
     Sample(const edm::DataFrame& frame, edm::DataFrame::size_type i) : frame_(frame),i_(i) { }
     static const int MASK_ADC = 0xFF;
-    static const int MASK_TDC = 0x3F;
+    static const int MASK_TDC = 0x3; //different for ngHB
     static const int OFFSET_TDC = 8; // 8 bits
     static const int MASK_SOI = 0x4000;
-    static const int MASK_CAPID = 0x3;
+    static const int MASK_CAPID = 0xC;//different for ngHB
     static const int OFFSET_CAPID = 8;
+    static const int MASK_LE = 0x2000;//feature of ngHB data
     int adc() const { return frame_[i_]&MASK_ADC; }
     int tdc() const { return (frame_[i_]>>OFFSET_TDC)&MASK_TDC; }
     bool soi() const { return frame_[i_]&MASK_SOI; }
-    int capid() const { return ((((frame_[0]>>OFFSET_CAPID)&MASK_CAPID)+i_)&MASK_CAPID); }
+    int capid() const { return (frame_[i_]>>OFFSET_CAPID)&MASK_CAPID; } //different as each sample has its own 2 bits of CapID
+    bool le() const { return frame_[i_]&MASK_LE; } //link error per sample
   private:
     const edm::DataFrame& frame_;
     edm::DataFrame::size_type i_;
@@ -59,18 +61,19 @@ public:
   /// was there a link error?
   static const int MASK_LINKERROR = 0x800;
   bool linkError() const { return m_data[0]&MASK_LINKERROR; } 
-  /// was there a capid rotation error?
-  static const int MASK_CAPIDERROR = 0x400;
-  bool capidError() const { return m_data[0]&MASK_CAPIDERROR; } 
+  /// was there a capid rotation error?  NO BIT SET FOR THIS IN NGHB CAPID SPECIFIED FOR EACH SAMPLE.
+  //static const int MASK_CAPIDERROR = 0x400;
+  //bool capidError() const { return m_data[0]&MASK_CAPIDERROR; } 
   /// was this a mark-and-pass ZS event?
-  bool zsMarkAndPass() const {return (flavor()==1); }
+  static const int MASK_MARKPASS = 0x100;
+  bool zsMarkAndPass() const {return m_data[0]&MASK_MARKPASS; }
   /// set ZS params
   void setZSInfo(bool markAndPass);
   /// get the sample
   inline Sample operator[](edm::DataFrame::size_type i) const { return Sample(m_data,i+HEADER_WORDS); }
-  void setCapid0(int cap0);
+  //void setCapid0(int cap0);
   /// set the sample contents
-  void setSample(edm::DataFrame::size_type isample, int adc, int tdc, bool soi=false);
+  void setSample(edm::DataFrame::size_type isample, int adc, int tdc, int capid, bool soi=false, bool le=false);
   /// get the flag word
   uint16_t flags() const { return m_data[size()-1]; }
   /// set the flag word
