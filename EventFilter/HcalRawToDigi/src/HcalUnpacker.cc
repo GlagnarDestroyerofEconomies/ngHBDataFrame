@@ -729,19 +729,19 @@ void HcalUnpacker::unpackUTCA(const FEDRawData& raw, const HcalElectronicsMap& e
         for (++i; i != iend && !i.isHeader(); ++i) {
           ns++;
         }
-        // Check QEI11 container exists
-        if (colls.qie11 == 0) {
-          colls.qie11 = new QIE11DigiCollection(ns);
+        // Check ngHB container exists
+        if (colls.ngHB == 0) {
+          colls.ngHB = new ngHBDigiCollection(ns);
         }
-        else if (colls.qie11->samples() != ns) {
+        else if (colls.ngHB->samples() != ns) {
           // This is horrible
-          edm::LogError("Invalid Data") << "QIE11 Collection has " << colls.qie11->samples() << " samples per digi, raw data has " << ns << "!";
+          edm::LogError("Invalid Data") << "ngHB Collection has " << colls.ngHB->samples() << " samples per digi, raw data has " << ns << "!";
           return;
         }
 
         // Insert data
         if (!did.null()) { // unpack and store...
-          colls.qie11->addDataFrame(did, head_pos);
+          colls.ngHB->addDataFrame(did, head_pos);
         } else {
           report.countUnmappedDigi(eid);
           if (unknownIds_.find(eid)==unknownIds_.end()) {
