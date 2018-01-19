@@ -1,9 +1,12 @@
 #include "DataFormats/HcalDigi/interface/QIE11DataFrame.h"
 #include "DataFormats/HcalDetId/interface/HcalGenericDetId.h"
 
+int QIE11DataFrame::Sample::tdc() { return (frame_[i_]>>OFFSET_TDC)&(detFlavor == 0 ? MASK_TDC_HE : MASK_TDC_HB); }
+int QIE11DataFrame::Sample::capid() { return (detFlavor == 0 ? ((((frame_[0]>>OFFSET_CAPID)&MASK_CAPID_HE)+i_-HEADER_WORDS)&MASK_CAPID_HE) : (frame_[i_]>>OFFSET_CAPID)&MASK_CAPID_HB ); }
+
 void QIE11DataFrame::setCapid0(int cap0) {
   m_data[0]&=0xFCFF; // inversion of the capid0 mask
-  m_data[0]|=((cap0&Sample::MASK_CAPID)<<Sample::OFFSET_CAPID);  
+  m_data[0]|=((cap0&Sample::MASK_CAPID_HE)<<Sample::OFFSET_CAPID);  
 }
 
 void QIE11DataFrame::setFlags(uint16_t v) {
@@ -22,6 +25,10 @@ int QIE11DataFrame::presamples() const {
     if ((*this)[i].soi()) return i;
   }
   return -1;
+}
+bool QIE11DataFrame::zsMarkAndPass(){
+  if ( detectorFlavor() == 0) return (flavor() == 1) ;
+  return m_data[0]&MASK_MARKPASS;
 }
 
 void QIE11DataFrame::setZSInfo(bool markAndPass){

@@ -22,15 +22,19 @@ public:
   public:
     Sample(const edm::DataFrame& frame, edm::DataFrame::size_type i) : frame_(frame),i_(i) { }
     static const int MASK_ADC = 0xFF;
-    static const int MASK_TDC = 0x3F;
+    static const int MASK_TDC_HE = 0x3F;   //ngHE mask
+    static const int MASK_TDC_HB = 0x3;    //ngHB mask
     static const int OFFSET_TDC = 8; // 8 bits
     static const int MASK_SOI = 0x4000;
-    static const int MASK_CAPID = 0x3;
+    static const int MASK_CAPID_HE = 0x3;  //ngHE mask
+    static const int MASK_CAPID_HB = 0xC;  //ngHB mask
     static const int OFFSET_CAPID = 8;
+    static const int MASK_LE = 0x2000;//feature of ngHB data
     int adc() const { return frame_[i_]&MASK_ADC; }
-    int tdc() const { return (frame_[i_]>>OFFSET_TDC)&MASK_TDC; }
+    int tdc(); 
     bool soi() const { return frame_[i_]&MASK_SOI; }
-    int capid() const { return ((((frame_[0]>>OFFSET_CAPID)&MASK_CAPID)+i_-HEADER_WORDS)&MASK_CAPID); }
+    int capid();
+    bool le() const { return frame_[i_]&MASK_LE; } //link error per sample
   private:
     const edm::DataFrame& frame_;
     edm::DataFrame::size_type i_;
@@ -41,6 +45,7 @@ public:
   /// Get the detector id
   DetId detid() const { return DetId(m_data.id()); }
   edm::DataFrame::id_type id() const { return m_data.id(); }
+  int detectorFlavor() { return detFlavor; } //HE = 0 HB = 1
   /// more accessors
   edm::DataFrame::size_type size() const { return m_data.size(); }
   /// iterators
@@ -63,7 +68,8 @@ public:
   static const int MASK_CAPIDERROR = 0x400;
   bool capidError() const { return m_data[0]&MASK_CAPIDERROR; } 
   /// was this a mark-and-pass ZS event?
-  bool zsMarkAndPass() const {return (flavor()==1); }
+  static const int MASK_MARKPASS = 0x100; //FOR HB
+  bool zsMarkAndPass();
   /// set ZS params
   void setZSInfo(bool markAndPass);
   /// get the sample
@@ -78,6 +84,7 @@ public:
 
   private:
    edm::DataFrame m_data;
+   int detFlavor;  //HE = 0 HB = 1, DEFAULT HE
 
 };
 
