@@ -26,9 +26,16 @@ int QIE11DataFrame::presamples() const {
   }
   return -1;
 }
-bool QIE11DataFrame::zsMarkAndPass(){
-  if ( detectorFlavor() == 0) return (flavor() == 1) ;
-  return m_data[0]&MASK_MARKPASS;
+bool QIE11DataFrame::capidError() const {
+  if (flavor() == FLAVOR_6CHANNEL) return m_data[0]&MASK_CAPIDERROR;
+  //CALCULATE FOR NGHB
+  int capid_guess = begin()->capid();
+  for(edm::DataFrame::const_iterator sample = begin(); sample != end(); sample++) {
+    if(capid_guess != sample->capid()) return true; //GUESS DOES NOT MATCH CAPID, THIS IS A ROTATION ERROR
+    if(capid_guess == 3) capid_guess = -1;          //LOOP BACK 0,1,2,3->0,1,2,3
+    capid_guess++;
+  }                                 
+  return false;
 }
 
 void QIE11DataFrame::setZSInfo(bool markAndPass){
@@ -37,10 +44,11 @@ void QIE11DataFrame::setZSInfo(bool markAndPass){
 
 void QIE11DataFrame::setSample(edm::DataFrame::size_type isample, int adc, int tdc, bool soi) {
   if (isample>=size()) return;
-  m_data[isample+1]=(adc&Sample::MASK_ADC)|(soi?(Sample::MASK_SOI):(0))|((tdc&Sample::MASK_TDC)<<Sample::OFFSET_TDC);
+  if (detFlavor == 0) m_data[isample+1]=(adc&Sample::MASK_ADC)|(soi?(Sample::MASK_SOI):(0))|((tdc&Sample::MASK_TDC_HE)<<Sample::OFFSET_TDC);
+  if (detFlavor == 1) m_data[isample+1]=(adc&Sample::MASK_ADC)|(soi?(Sample::MASK_SOI):(0))|((tdc&Sample::MASK_TDC_HB)<<Sample::OFFSET_TDC);
 }
 
-std::ostream& operator<<(std::ostream& s, const QIE11DataFrame& digi) {
+std::ostream& operator<<(std::ostream& s, QIE11DataFrame& digi) {
   if (digi.detid().det()==DetId::Hcal) {
     s << HcalGenericDetId(digi.detid());
   } else {
