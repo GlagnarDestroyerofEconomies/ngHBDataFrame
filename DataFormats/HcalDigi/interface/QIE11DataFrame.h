@@ -22,6 +22,11 @@ public:
   QIE11DataFrame() { }
   QIE11DataFrame(edm::DataFrame const & df) : m_data(df) { }
 
+  /// get the flavor of the frame
+  static const int OFFSET_FLAVOR = 12;
+  static const int MASK_FLAVOR = 0x7;
+  int flavor() const { return ((m_data[0]>>OFFSET_FLAVOR)&MASK_FLAVOR); } //3 for 8 bit 0 or 1 for 6 bit 2 for HF
+  
   class Sample {
   public:
     Sample(const edm::DataFrame& frame, edm::DataFrame::size_type i) : frame_(frame),i_(i) { }
@@ -35,11 +40,12 @@ public:
     static const int OFFSET_CAPID_HE = 8;
     static const int MASK_LE = 0x2000;//feature of ngHB data
     int adc() const { return frame_[i_]&MASK_ADC; }
-    int tdc() const { return (frame_.flavor()==FLAVOR_8CHANNEL)?((frame_[i_]&MASK_TDC_HB)>>OFFSET_TDC):((frame_[i_]&MASK_TDC_HE)>>OFFSET_TDC);}
+    int tdc() const { return (flavorFrame()==FLAVOR_8CHANNEL)?((frame_[i_]&MASK_TDC_HB)>>OFFSET_TDC):((frame_[i_]&MASK_TDC_HE)>>OFFSET_TDC);}
     bool soi() const { return frame_[i_]&MASK_SOI; }
-    int capid() const { return (frame_.flavor()==FLAVOR_8CHANNEL)?((frame_[i_]>>OFFSET_CAPID_HB)&MASK_CAPID):((((frame_[0]>>OFFSET_CAPID_HE)&MASK_CAPID)+i_)&MASK_CAPID); }
-    bool le() const { return (frame_.flavor()==FLAVOR_8CHANNEL)?(frame_[i_]&MASK_LE):(frame_.linkError()); } //link error per sample
+    int capid() const { return (flavorFrame()==FLAVOR_8CHANNEL)?((frame_[i_]>>OFFSET_CAPID_HB)&MASK_CAPID):((((frame_[0]>>OFFSET_CAPID_HE)&MASK_CAPID)+i_)&MASK_CAPID); }
+    bool le() const { return (flavorFrame()==FLAVOR_8CHANNEL)?(frame_[i_]&MASK_LE):(frame_.linkError()); } //link error per sample
   private:
+    int flavorFrame() const { return ((frame_[0]>>OFFSET_FLAVOR)&MASK_FLAVOR); } //3 for 8 bit 0 or 1 for 6 bit 2 for HF
     const edm::DataFrame& frame_;
     edm::DataFrame::size_type i_;
   };
@@ -60,10 +66,6 @@ public:
   int samples() const { return (size()-HEADER_WORDS-FLAG_WORDS)/WORDS_PER_SAMPLE; }
   /// for backward compatibility
   int presamples() const;
-  /// get the flavor of the frame
-  static const int OFFSET_FLAVOR = 12;
-  static const int MASK_FLAVOR = 0x7;
-  int flavor() const { return ((m_data[0]>>OFFSET_FLAVOR)&MASK_FLAVOR); } //3 for 8 bit 0 or 1 for 6 bit 2 for HF
   /// was there a link error?
   static const int MASK_LINKERROR = 0x800;
   bool linkError() const { return m_data[0]&MASK_LINKERROR; } 
